@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+
+
+<!DOCTYPE html>  
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>テンプレ</title>
+<title>HIDE OUT</title>
 <style>
   html, body{height:100%; overflow:hidden;}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;color:#111;}
@@ -28,8 +30,8 @@
     background-position:center;
     background-repeat:no-repeat;
   }
-  main.prejoin{ background-image:url('maemain.jpg'); }
-  main.joined{ background-image:url('maingazo.jpg'); }
+  main.prejoin{ background-image:url('hideouttop.jpg'); }
+  main.joined{ background-image:url('hideoutmain.jpg'); }
 
   .seat-pop{
     position:fixed;left:50%;bottom:10px;transform:translateX(-50%);
@@ -129,25 +131,45 @@
     box-shadow:0 0 0 3px rgba(0,0,0,.10), 0 6px 16px rgba(0,0,0,.22);
   }
 
-  .chiparea{
-    position:absolute;
-    left:50%; top:50%;
-    width:54px; height:54px;
-    border-radius:999px;
-    border:2px solid #111;
-    background:transparent;
-    box-shadow:none;
-    pointer-events:none;
-    transform: translate(-50%,-50%) translate(var(--chip-x, 0px), var(--chip-y, 0px));
-  }
-  .chiparea.center{
-    transform: translate(-50%,-50%);
-  }
-  .chiparea.drop-ok{
-    border-width:3px;
-    box-shadow:0 0 0 3px rgba(0,0,0,.08);
-  }
+.chiparea{
+  position:absolute;
+  left:50%; top:50%;
+  width:54px; height:54px;
+  border-radius:999px;
 
+  /* ★普段は見えない（非表示） */
+  opacity:0;
+  border:2px solid rgba(255,255,255,0);
+  background:rgba(255,255,255,0);
+  box-shadow:none;
+
+  pointer-events:none;
+  transform: translate(-50%,-50%) translate(var(--chip-x, 0px), var(--chip-y, 0px));
+
+  /* ★出す/消すを滑らかに */
+  transition: opacity .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
+}
+
+.chiparea.center{
+  transform: translate(-50%,-50%);
+}
+
+/* ★カラーカードをドラッグ中だけ薄く表示（黒円は出さない） */
+.chiparea.ring{
+  opacity:1;
+  border-color: rgba(255,255,255,.70);
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.12);
+}
+
+/* ★ホバー中はちょい強調（でも薄いまま） */
+.chiparea.drop-ok{
+  opacity:1;
+  border-width:3px;
+  border-color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.16);
+  box-shadow: 0 0 0 4px rgba(0,0,0,.14);
+}
   .colorcard{
     width:22px;height:30px;
     border-radius:7px;
@@ -271,7 +293,7 @@
 
   .dialog-backdrop{
     position:fixed;inset:0;background:rgba(0,0,0,.35);
-    display:flex;align-items:center;justify-content:center;z-index:300;
+    display:flex;align-items:center;justify-content:center;z-index:360;
   }
   .dialog-backdrop.hidden{display:none;}
   .dialog-box{
@@ -351,6 +373,66 @@
   .role-desc{flex:1 1 auto;}
   .role-desc .name{font-weight:900;margin-bottom:4px;}
   .role-desc .text{font-size:13px;line-height:1.55;color:#222;white-space:pre-wrap;}
+
+  /* ===== ★ 追加：ヘルプ内「内訳」UI ===== */
+  .help-sep{
+    margin:12px 0;
+    height:1px;
+    background:#eee;
+  }
+  .atk-breakdown-title{
+    font-weight:900;
+    font-size:13px;
+    margin:0 0 8px;
+  }
+
+  /* ★行は「重ねたカードだけ」 */
+  .atk-row{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:0;
+    padding:6px 0;
+    border-bottom:1px dashed #eee;
+  }
+  .atk-row:last-child{ border-bottom:none; }
+
+  .atk-stack{
+    position:relative;
+    height:68px;
+    flex:0 0 auto;
+
+    /* ★サイズを変えやすいよう変数化 */
+    --w:42px;
+    --h:62px;
+    --gap:8px;
+  }
+  .atk-mini{
+    position:absolute;
+    left:0; top:0;
+    width:var(--w); height:var(--h);
+    border-radius:10px;border:1px solid #ddd;
+    background:#fff;
+    background-size:cover;background-position:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.14);
+    transform: translateX(calc(var(--i,0) * var(--gap)));
+  }
+
+  /* ★数字タグ：一番左のカード（i=0）の右上に固定 */
+  .atk-count-badge{
+    position:absolute;
+    left: calc(var(--w) - 6px);
+    top: -6px;
+    min-width:18px;height:18px;
+    padding:0 6px;
+    border-radius:999px;
+    background:#111;color:#fff;
+    font-size:11px;font-weight:900;
+    display:grid;place-items:center;
+    border:1px solid rgba(255,255,255,.65);
+    box-shadow:0 6px 14px rgba(0,0,0,.18);
+    pointer-events:none;
+  }
 
   .peek-backdrop{
     position:fixed; inset:0;
@@ -447,11 +529,7 @@
   }
 
   .challenge-msg{ display:none; }
-
-  .reveal-row{
-    margin-top:10px;
-    display:none;
-  }
+  .reveal-row{ margin-top:10px; display:none; }
 
   /* ===== シャッフル：白ボックス透明化してカードだけ残す ===== */
   .challenge-board.stage-shuffle{
@@ -481,7 +559,7 @@
     position:absolute;
     left:50%; top:50%;
     transform:translate(-50%,-50%) translateX(var(--sx,0px)) rotate(var(--rot,0deg));
-    animation: shuffleCard 0.90s cubic-bezier(.22,.84,.44,1) forwards;
+    animation: shuffleCard 0.9s cubic-bezier(.22,.84,.44,1) forwards;
     will-change: transform;
   }
   @keyframes shuffleCard{
@@ -501,7 +579,7 @@
   }
   .flop{
     animation: flopBack .55s cubic-bezier(.22,.84,.44,1) forwards;
-    animation-delay:2s;
+    animation-delay:3.0s;
     transform-origin:bottom;
   }
 
@@ -617,7 +695,7 @@
     transform: translate(-50%,-50%) translate(var(--mx), var(--my)) rotate(var(--rot));
     will-change: transform, opacity;
     opacity:1;
-    transition: transform 1.50s cubic-bezier(.22,.84,.44,1), opacity 1.50s ease;
+    transition: transform 0.7s cubic-bezier(.22,.84,.44,1), opacity 0.7s ease;
   }
 
   @keyframes ajitoCenterShuffle {
@@ -632,7 +710,7 @@
     100% { transform: translate(-50%,-50%) translate(var(--mx), var(--my)) rotate(var(--rot)); }
   }
   .center-shuffle{
-    animation: ajitoCenterShuffle 1.50s cubic-bezier(.22,.84,.44,1) 1;
+    animation: ajitoCenterShuffle 0.70s cubic-bezier(.22,.84,.44,1) 1;
   }
 
   /* 公開されたアジトの“強調”だけ（transform触らずに光らせる） */
@@ -647,7 +725,7 @@
 <body>
 
 <header>
-  <h1>テンプレ</h1>
+  <h1>HIDE OUT</h1>
   <div style="display:flex;align-items:center;gap:6px;">
     <div class="small" id="roomInfo"></div>
     <button class="btn ghost" id="copyLinkBtn">COPY</button>
@@ -767,14 +845,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAMeKfMoHt9qOQ2VuUBpkrKuei7yGBbEi8",
-  authDomain: "cheesetheft-fd52f.firebaseapp.com",
-  databaseURL: "https://cheesetheft-fd52f-default-rtdb.firebaseio.com",
-  projectId: "cheesetheft-fd52f",
-  storageBucket: "cheesetheft-fd52f.firebasestorage.app",
-  messagingSenderId: "298688959395",
-  appId: "1:298688959395:web:6ac2c3eb214201f2020016",
-  measurementId: "G-HPDFTCLR8H"
+  apiKey: "AIzaSyDUP1foVQnitM45do_UtYLkcc9gvgQC-xw",
+  authDomain: "timebomb-3b0c7.firebaseapp.com",
+  databaseURL: "https://timebomb-3b0c7-default-rtdb.firebaseio.com",
+  projectId: "timebomb-3b0c7",
+  storageBucket: "timebomb-3b0c7.firebasestorage.app",
+  messagingSenderId: "532935786630",
+  appId: "1:532935786630:web:ef1f97c862bfaad67d1107",
+  measurementId: "G-K8NRR8K64Y"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -966,6 +1044,67 @@ async function restoreSeatFromDB(){
   if (mySeatIndex !== null) state.seatedTable = mySeatIndex;
 }
 
+function collectDropFromUpdates(dropObj, fromId, toId, basePath, updates){
+  if (!dropObj) return;
+  Object.entries(dropObj).forEach(([key, value]) => {
+    if (value && value.from === fromId){
+      updates[`${basePath}/${key}/from`] = toId;
+    }
+  });
+}
+
+function buildSeatTransferUpdates(roomData, fromId, toId){
+  if (!roomData || !fromId || !toId || fromId === toId) return {};
+
+  const updates = {};
+
+  const roles = roomData.roles || {};
+  if (roles[fromId]){
+    updates[`roles/${toId}`] = roles[fromId];
+    updates[`roles/${fromId}`] = null;
+  }
+
+  const ajito = roomData.ajito || {};
+  if (ajito[fromId]){
+    updates[`ajito/${toId}`] = ajito[fromId];
+    updates[`ajito/${fromId}`] = null;
+  }
+
+  const placed = roomData.placedDrops || {};
+  const placedPlayer = placed.player || {};
+  if (placedPlayer[fromId]){
+    const existing = placedPlayer[toId] || {};
+    updates[`placedDrops/player/${toId}`] = { ...existing, ...placedPlayer[fromId] };
+    updates[`placedDrops/player/${fromId}`] = null;
+  }
+
+  collectDropFromUpdates(placed.center || {}, fromId, toId, 'placedDrops/center', updates);
+  Object.entries(placedPlayer || {}).forEach(([targetId, dropObj]) => {
+    collectDropFromUpdates(dropObj, fromId, toId, `placedDrops/player/${targetId}`, updates);
+  });
+
+  const turn = roomData.turn || null;
+  if (turn && turn.activePlayerId === fromId){
+    updates['turn/activePlayerId'] = toId;
+  }
+
+  const ch = roomData.challenge || null;
+  if (ch?.participants?.[fromId]){
+    updates[`challenge/participants/${toId}`] = ch.participants[fromId];
+    updates[`challenge/participants/${fromId}`] = null;
+  }
+
+  if (ch?.target?.kind === 'player' && ch?.target?.id === fromId){
+    updates['challenge/target/id'] = toId;
+  }
+
+  if (ch?.post?.target?.id === fromId){
+    updates['challenge/post/target/id'] = toId;
+  }
+
+  return updates;
+}
+
 function refreshRoomLabels(){
   if (!state.roomCode || !state.userName) return;
   const label = state.isHost ? '（ホスト）' : '';
@@ -984,15 +1123,120 @@ function updateHostUI(){
   helpBtn.classList.add('visible');
 }
 
-/* ====== ヘルプ ====== */
+/* ====== ヘルプ（ここを要望どおりに差し替え） ====== */
 const ROLE_HELP = [
-  { key:"swat", name:"スワット", img: IMG.role_swat, text:"市民側（スワット）です。" },
-  { key:"tero", name:"テロリスト", img: IMG.role_tero, text:"敵側（テロリスト）です。" },
+  {
+    key:"swat",
+    name:"スワット",
+    img: IMG.role_swat,
+    text:"ハイドアウトを全て見つけると勝ち。隊員カードが8枚以下になると負ける。"
+  },
+  {
+    key:"tero",
+    name:"テロリスト",
+    img: IMG.role_tero,
+    text:"BOOMを公開すると勝ち。または隊員カードが8枚以下になると勝ち。"
+  },
 ];
 
 function roleKeyToName(type){
   return (type === 'tero') ? 'テロリスト' : 'スワット';
 }
+function roleTypeToImg(type){
+  return (type === 'tero') ? IMG.role_tero : IMG.role_swat;
+}
+
+/* （フォールバック用）初期内訳 */
+function getAttackComposition(n){
+  const comp = { swat:0, expertswat:0, terrorist:0, superterrorist:0 };
+  const add = (k, v) => comp[k] = (comp[k] || 0) + v;
+
+  if (n === 4){
+    add('swat', 8); add('expertswat', 4); add('terrorist', 4); add('superterrorist', 4);
+  } else if (n === 5){
+    add('swat', 10); add('expertswat', 5); add('terrorist', 5); add('superterrorist', 5);
+  } else if (n === 6){
+    add('swat', 12); add('expertswat', 6); add('terrorist', 6); add('superterrorist', 6);
+  } else {
+    const sw = Math.max(8, n*2);
+    const ex = Math.max(4, Math.ceil(n));
+    const te = Math.max(4, Math.ceil(n));
+    const su = Math.max(4, Math.ceil(n));
+    add('swat', sw); add('expertswat', ex); add('terrorist', te); add('superterrorist', su);
+  }
+  return comp;
+}
+
+/* ★要望：残り山札（attackDeck.draw）の内訳を作る */
+function getRemainingAttackCounts(){
+  const comp = { swat:0, expertswat:0, terrorist:0, superterrorist:0 };
+
+  const draw = state.attackDeck?.draw;
+  if (Array.isArray(draw)){
+    draw.forEach(t => {
+      if (t in comp) comp[t] += 1;
+    });
+    return { comp, total: draw.length };
+  }
+
+  // 未配布時のフォールバック（人数から想定内訳）
+  const n = (latestPlayers && latestPlayers.length) ? latestPlayers.length : (state.room?.maxPlayers || 4);
+  const c2 = getAttackComposition(n);
+  const total = Object.values(c2).reduce((a,b)=>a+(b||0),0);
+  return { comp: c2, total };
+}
+
+/* ★重ねカード（数字タグは一番左カードの右上） */
+function makeAtkStack(type, count){
+  const wrap = document.createElement('div');
+  wrap.className = 'atk-stack';
+
+  const showN = Math.min(6, Math.max(1, count)); // 0でも見た目は1枚だけ薄く出す
+  for (let i=0;i<showN;i++){
+    const c = document.createElement('div');
+    c.className = 'atk-mini';
+    c.style.setProperty('--i', String(i));
+    c.style.backgroundImage = `url('${attackTypeToImg(type)}')`;
+    if (count <= 0) c.style.opacity = '0.22';
+    wrap.appendChild(c);
+  }
+
+  const badge = document.createElement('div');
+  badge.className = 'atk-count-badge';
+  badge.textContent = String(count);
+  wrap.appendChild(badge);
+
+  return wrap;
+}
+
+function renderAttackBreakdown(){
+  // ★残り山札の内訳（attackDeck.draw）
+  const { comp, total } = getRemainingAttackCounts();
+
+  const title = document.createElement('div');
+  title.className = 'atk-breakdown-title';
+  title.textContent = `残り山札の内訳（残り${total}枚）`;
+  helpBody.appendChild(title);
+
+  const rows = [
+    { type:'swat',           count: comp.swat },
+    { type:'expertswat',     count: comp.expertswat },
+    { type:'terrorist',      count: comp.terrorist },
+    { type:'superterrorist', count: comp.superterrorist },
+  ];
+
+  rows.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'atk-row';
+
+    // ★左のカード/名前は作らない。ここに「重ねたカード表示」だけ
+    const stack = makeAtkStack(r.type, r.count);
+
+    row.appendChild(stack);
+    helpBody.appendChild(row);
+  });
+}
+
 function renderHelpList(){
   helpBody.innerHTML = '';
 
@@ -1027,7 +1271,7 @@ function renderHelpList(){
     return;
   }
 
-  // 未公開：ルール説明
+  // ★未公開：指定どおり「スワット」「テロリスト」だけ
   ROLE_HELP.forEach((r) => {
     const row = document.createElement('div');
     row.className = 'role-row';
@@ -1046,7 +1290,16 @@ function renderHelpList(){
     row.appendChild(desc);
     helpBody.appendChild(row);
   });
+
+  // ★区切り線
+  const sep = document.createElement('div');
+  sep.className = 'help-sep';
+  helpBody.appendChild(sep);
+
+  // ★アタックカード内訳（残り山札）
+  renderAttackBreakdown();
 }
+
 function openHelp(){
   renderHelpList();
   helpBackdrop.classList.remove('hidden');
@@ -1126,14 +1379,11 @@ function showAjitoFocus(type, mode){
     ajitoFocusCard.appendChild(layer);
   }
 
-  // 1.5秒アニメ＋余裕
   focusHideTimer = setTimeout(() => hideAjitoFocus(), 1700);
 }
 
 /* =========================
    ★ アジト：集合→中央シャッフル→再配布（完全作り直し）
-   - 集めている間：該当スロットのアジトは消える（visibility:hidden）
-   - アニメ中：renderPlayerCircle が DOM を壊さないように一時停止
    ========================= */
 let ajitoRedealLock = false;
 let ajitoAnimPlaying = false;     // ★サークル再描画ブロック用
@@ -1285,7 +1535,7 @@ async function runAjitoRedealAnim(sourceSlots, destSlots){
         o.clone.style.setProperty('--rot', `${rot.toFixed(0)}deg`);
       });
     });
-    await sleep(1500);
+    await sleep(700);
 
     shuffle(clones.slice()).forEach((o, idx) => {
       o.clone.style.zIndex = String(2100 + idx);
@@ -1372,6 +1622,22 @@ function getDropTargets(){
   return targets;
 }
 
+function showAjitoRings(targets){
+  (targets || []).forEach(t => {
+    if (t?.el?.classList?.contains('chiparea')){
+      t.el.classList.add('ring');
+    }
+  });
+}
+function hideAjitoRings(targets){
+  (targets || []).forEach(t => {
+    if (t?.el?.classList?.contains('chiparea')){
+      t.el.classList.remove('ring');
+    }
+  });
+}
+
+
 function startColorDrag(e, sourceEl){
   if (!isMyTurn()) return;
   if (placingLock) return;
@@ -1397,7 +1663,11 @@ function startColorDrag(e, sourceEl){
 
   const clearHighlights = () => {
     dragCtx?.targets.forEach(t => t.el.classList.remove('drop-ok'));
+  showAjitoRings(targets);
+
   };
+
+
 
   const onMove = (ev) => {
     if (!dragCtx) return;
@@ -1423,6 +1693,7 @@ function startColorDrag(e, sourceEl){
     const hover = dragCtx.hover;
 
     clearHighlights();
+hideAjitoRings(dragCtx.targets);
     dragCtx.ghost.remove();
     dragCtx.sourceEl.style.visibility = '';
     dragCtx = null;
@@ -2056,11 +2327,6 @@ async function hostCloseSubmitUI(){
   });
 }
 
-/* =========================
-   ★追加：正体公開条件
-   - boom が公開され、拡大（focus）アニメが終わった後
-   - すべての hideout が公開され、拡大（focus）アニメが終わった後
-   ========================= */
 function areAllHideoutsRevealed(room){
   room = room || {};
   const aj = room.ajito || {};
@@ -2080,7 +2346,7 @@ async function hostRevealAllRolesIfNeeded(reason){
   const snap = await get(ref(db, base));
   const room = snap.val() || {};
 
-  if (room.rolesOpen) return; // 既に公開済み
+  if (room.rolesOpen) return;
 
   const ch = room.challenge;
   const up = {
@@ -2089,7 +2355,6 @@ async function hostRevealAllRolesIfNeeded(reason){
     rolesOpenReason: reason || 'unknown',
   };
 
-  // ★挑戦中なら post も出して全員が同時に反応できるように
   if (ch?.active){
     up[`challenge/postSeq`] = (ch.postSeq || 0) + 1;
     up[`challenge/post`] = { type:'revealRoles', reason: reason || 'unknown', at: Date.now() };
@@ -2110,8 +2375,6 @@ async function hostMaybeRevealRolesAfterFocus(){
   if (!ch?.active) return;
 
   const post = ch.post || {};
-  // focus の直後にだけ判定（「拡大カードアニメが終わったら」に合わせる）
-  // ※タイマーで 1700ms 後に呼ぶので、この時点でアニメは終わってる
   const isBoom = !!post.isBoom;
   const allHideouts = areAllHideoutsRevealed(room);
 
@@ -2165,7 +2428,6 @@ async function hostReturnAttackCardsToDeckIfNeeded(){
   const ch = room.challenge;
 
   if (!ch?.active) return;
-
   if (ch.cardsReturned) return;
 
   let deck = room.attackDeck;
@@ -2246,7 +2508,8 @@ async function hostFocusAjitoAndPost(){
   });
 }
 
-/* ★ホスト：未公開アジトだけをシャッフル＆空きに再配布（DB＋post） */
+/* ★ホスト：未公開アジトだけをシャッフル＆空きに再配布（DB＋post）
+   ★修正：rolesOpen=true（正体公開後）は「一切シャッフルしない」 */
 async function hostDoAjitoRedealAndPost(){
   if (!state.isHost) return;
   if (!state.roomCode) return;
@@ -2256,6 +2519,14 @@ async function hostDoAjitoRedealAndPost(){
   const room = roomSnap.val() || {};
   const chNow = room.challenge;
   if (!chNow?.active) return;
+
+  if (room.rolesOpen) {
+    await update(ref(db, `${base}/challenge`), {
+      postSeq: (chNow.postSeq || 0) + 1,
+      post: { type:'skipRedealAjito', reason:'rolesOpen', at: Date.now() }
+    });
+    return;
+  }
 
   const aj = room.ajito || {};
   const center = room.ajitoCenter || null;
@@ -2416,21 +2687,24 @@ async function hostProgressChallenge(){
         uiClosed: false
       });
 
-      const WAIT_AFTER_REVEAL_FLOP = 2600; // attack flop: 2.0s + 0.55s 余裕
-      const WAIT_CLOSE_TO_REVEAL_AJITO = 2000;
-      const WAIT_REVEAL_TO_FOCUS = 1000;
+      const WAIT_AFTER_REVEAL_FLOP = 5000;
+      const WAIT_CLOSE_TO_REVEAL_AJITO = 1300;
+      const WAIT_REVEAL_TO_FOCUS = 600;
       const FOCUS_ANIM = 1500;
-      const FOCUS_HIDE = 1700;             // ★showAjitoFocus の消えるタイミングに合わせる
-      const WAIT_FOCUS_END_TO_REDEAL = 2000;
+      const FOCUS_HIDE = 1700;
+      const WAIT_FOCUS_END_TO_REDEAL = 1000;
 
-      const REDEAL_TOTAL = 1500 + 1500 + 1500 + 300; // 集合/洗/发 + 余裕
+      const REDEAL_TOTAL = 700 + 700 + 700 + 300;
 
       clearHostTimers();
 
-      hostCloseSubmitTimer = setTimeout(async () => {
-        await hostReturnAttackCardsToDeckIfNeeded();
-        await hostCloseSubmitUI();
-      }, WAIT_AFTER_REVEAL_FLOP);
+hostCloseSubmitTimer = setTimeout(async () => {
+  // ★先に提出UIを閉じる（これ以降 renderChallengeUI が early return する）
+  await hostCloseSubmitUI();
+
+  // ★その後に山札へ戻す更新（attackDeck更新）をしても、画面が見えてないのでフロップが巻き戻らない
+  await hostReturnAttackCardsToDeckIfNeeded();
+}, WAIT_AFTER_REVEAL_FLOP);
 
       if (success){
         hostRevealAjitoTimer = setTimeout(async () => {
@@ -2441,12 +2715,24 @@ async function hostProgressChallenge(){
           await hostFocusAjitoAndPost();
         }, WAIT_AFTER_REVEAL_FLOP + WAIT_CLOSE_TO_REVEAL_AJITO + WAIT_REVEAL_TO_FOCUS);
 
-        /* ★追加：拡大カードアニメ終了後に「boom or 全hideout公開」なら全員正体公開 */
         hostRolesRevealTimer = setTimeout(async () => {
           await hostMaybeRevealRolesAfterFocus();
         }, WAIT_AFTER_REVEAL_FLOP + WAIT_CLOSE_TO_REVEAL_AJITO + WAIT_REVEAL_TO_FOCUS + FOCUS_HIDE);
 
         hostRedealAjitoTimer = setTimeout(async () => {
+          const roomSnap = await get(ref(db, `rooms/${state.roomCode}`));
+          const roomNow = roomSnap.val() || {};
+          if (roomNow.rolesOpen){
+            const chSnap = await get(ref(db, `rooms/${state.roomCode}/challenge`));
+            const chNow = chSnap.val();
+            if (chNow?.active){
+              await update(ref(db, `rooms/${state.roomCode}/challenge`), {
+                postSeq: (chNow.postSeq || 0) + 1,
+                post: { type:'skipRedealAjito', reason:'rolesOpen', at: Date.now() }
+              });
+            }
+            return;
+          }
           await hostDoAjitoRedealAndPost();
         }, WAIT_AFTER_REVEAL_FLOP + WAIT_CLOSE_TO_REVEAL_AJITO + WAIT_REVEAL_TO_FOCUS + FOCUS_ANIM + WAIT_FOCUS_END_TO_REDEAL);
 
@@ -2463,7 +2749,7 @@ async function hostProgressChallenge(){
         }, WAIT_AFTER_REVEAL_FLOP + WAIT_CLOSE_TO_REVEAL_AJITO + REDEAL_TOTAL);
       }
 
-    }, 900);
+    }, 600);
   }
 }
 
@@ -2476,7 +2762,6 @@ function subscribeRoom(){
     hostSelectingPop.classList.toggle('hidden', !waiting);
     syncSeatUI();
 
-    // ★rolesOpen が変わったら UI 更新（サークル/ヘルプ）
     requestRenderPlayerCircle();
     renderMyRole();
     if (!helpBackdrop.classList.contains('hidden')){
@@ -2545,6 +2830,7 @@ function subscribeAttackDeck(){
   onValue(aRef, snap => {
     state.attackDeck = snap.val() || null;
     renderChallengeUI();
+    if (!helpBackdrop.classList.contains('hidden')) renderHelpList(); // ★残り内訳更新
   });
 }
 
@@ -2590,7 +2876,6 @@ async function handleChallengePost(ch){
     await runAjitoRedealAnim(src, dst);
   }
 
-  // ★追加：全員正体公開 post（表示自体は room.rolesOpen で切替）
   if (post.type === 'revealRoles'){
     requestRenderPlayerCircle();
     renderMyRole();
@@ -2614,9 +2899,6 @@ function subscribeChallenge(){
 }
 
 /* ====== 表示 ====== */
-function roleTypeToImg(type){
-  return (type === 'tero') ? IMG.role_tero : IMG.role_swat;
-}
 function renderMyRole(){
   myHandEl.innerHTML = '';
   const my = state.roles[state.userId];
@@ -2963,7 +3245,6 @@ function renderPlayerCircle(players){
     const ix = -ox;
     const iy = -oy;
 
-    // ★ここを変更：rolesOpen のときは「表」を表示
     if (p.id !== state.userId && state.roles[p.id]?.type){
       const rType = state.roles[p.id].type;
 
@@ -3083,6 +3364,13 @@ btnKickYes.addEventListener('click', async (e) => {
     await update(roomRef, { hostId: state.userId });
   }
 
+  if (pendingSeatPlayerIdToSteal && pendingSeatPlayerIdToSteal !== state.userId) {
+    const transferUpdates = buildSeatTransferUpdates(roomData, pendingSeatPlayerIdToSteal, state.userId);
+    if (Object.keys(transferUpdates).length) {
+      await update(roomRef, transferUpdates);
+    }
+  }
+
   state.seatedTable = seatIndex;
 
   kickDialog.classList.add('hidden');
@@ -3097,7 +3385,7 @@ function getTeroCount(n){
   if (n <= 3) return 0;
   if (n === 4) return (Math.random() < 0.5) ? 1 : 2;
   if (n === 5) return 2;
-  if (n === 6) return (Math.random() < 0.5) ? 2 : 3;
+  if (n === 6) return 2; 
   return Math.max(0, Math.floor(n/3));
 }
 function buildAjitoDeck(n){
@@ -3170,7 +3458,6 @@ async function dealRolesAndAjito(){
     set(ref(db, `${base}/ajitoCenter`), { type: centerType, revealed:false }),
     set(ref(db, `${base}/attackDeck`), attack),
 
-    // ★追加：新ゲーム開始時は正体公開フラグを戻す
     update(ref(db, `${base}`), {
       gameStartedAt: Date.now(),
       rolesOpen: false,
@@ -3188,48 +3475,46 @@ async function dealRolesAndAjito(){
   ]);
 }
 
-/* ====== ホスト設定ポップ ====== */
+/* ====== ホストUI ====== */
 hostSettingsBtn.addEventListener('click', () => {
   if (!state.isHost) return;
   startPop.classList.toggle('hidden');
 });
-btnStartPopClose.addEventListener('click', () => {
-  startPop.classList.add('hidden');
-});
+btnStartPopClose.addEventListener('click', () => startPop.classList.add('hidden'));
+
 btnGameStart.addEventListener('click', async () => {
   if (!state.isHost) return;
-  await dealRolesAndAjito();
   startPop.classList.add('hidden');
+  await dealRolesAndAjito();
 });
 
-/* ====== リセット ====== */
-btnResetRoom.addEventListener('click', async () => {
+async function resetRoom(){
   if (!state.isHost || !state.roomCode) return;
-
   const base = `rooms/${state.roomCode}`;
+
+  clearHostTimers();
 
   await Promise.all([
     remove(ref(db, `${base}/roles`)),
     remove(ref(db, `${base}/ajito`)),
     remove(ref(db, `${base}/ajitoCenter`)),
     remove(ref(db, `${base}/attackDeck`)),
-    remove(ref(db, `${base}/challenge`)),
-    remove(ref(db, `${base}/gameStartedAt`)),
-    remove(ref(db, `${base}/turn`)),
     remove(ref(db, `${base}/placedDrops`)),
-    remove(ref(db, `${base}/maxPlayers`)),
-    remove(ref(db, `${base}/tables`)),
-
-    // ★追加：正体公開フラグも消す
-    remove(ref(db, `${base}/rolesOpen`)),
-    remove(ref(db, `${base}/rolesOpenAt`)),
-    remove(ref(db, `${base}/rolesOpenReason`)),
+    remove(ref(db, `${base}/challenge`)),
+    remove(ref(db, `${base}/turn`)),
+    update(ref(db, `${base}`), {
+      gameStartedAt: null,
+      rolesOpen: false,
+      rolesOpenAt: null,
+      rolesOpenReason: null
+    })
   ]);
+}
 
-  state.seatedTable = null;
-
+btnResetRoom.addEventListener('click', async () => {
+  if (!state.isHost) return;
   startPop.classList.add('hidden');
-  await syncSeatUI();
+  await resetRoom();
 });
 </script>
 
