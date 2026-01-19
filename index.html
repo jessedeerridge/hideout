@@ -1044,6 +1044,67 @@ async function restoreSeatFromDB(){
   if (mySeatIndex !== null) state.seatedTable = mySeatIndex;
 }
 
+function collectDropFromUpdates(dropObj, fromId, toId, basePath, updates){
+  if (!dropObj) return;
+  Object.entries(dropObj).forEach(([key, value]) => {
+    if (value && value.from === fromId){
+      updates[`${basePath}/${key}/from`] = toId;
+    }
+  });
+}
+
+function buildSeatTransferUpdates(roomData, fromId, toId){
+  if (!roomData || !fromId || !toId || fromId === toId) return {};
+
+  const updates = {};
+
+  const roles = roomData.roles || {};
+  if (roles[fromId]){
+    updates[`roles/${toId}`] = roles[fromId];
+    updates[`roles/${fromId}`] = null;
+  }
+
+  const ajito = roomData.ajito || {};
+  if (ajito[fromId]){
+    updates[`ajito/${toId}`] = ajito[fromId];
+    updates[`ajito/${fromId}`] = null;
+  }
+
+  const placed = roomData.placedDrops || {};
+  const placedPlayer = placed.player || {};
+  if (placedPlayer[fromId]){
+    const existing = placedPlayer[toId] || {};
+    updates[`placedDrops/player/${toId}`] = { ...existing, ...placedPlayer[fromId] };
+    updates[`placedDrops/player/${fromId}`] = null;
+  }
+
+  collectDropFromUpdates(placed.center || {}, fromId, toId, 'placedDrops/center', updates);
+  Object.entries(placedPlayer || {}).forEach(([targetId, dropObj]) => {
+    collectDropFromUpdates(dropObj, fromId, toId, `placedDrops/player/${targetId}`, updates);
+  });
+
+  const turn = roomData.turn || null;
+  if (turn && turn.activePlayerId === fromId){
+    updates['turn/activePlayerId'] = toId;
+  }
+
+  const ch = roomData.challenge || null;
+  if (ch?.participants?.[fromId]){
+    updates[`challenge/participants/${toId}`] = ch.participants[fromId];
+    updates[`challenge/participants/${fromId}`] = null;
+  }
+
+  if (ch?.target?.kind === 'player' && ch?.target?.id === fromId){
+    updates['challenge/target/id'] = toId;
+  }
+
+  if (ch?.post?.target?.id === fromId){
+    updates['challenge/post/target/id'] = toId;
+  }
+
+  return updates;
+}
+
 function refreshRoomLabels(){
   if (!state.roomCode || !state.userName) return;
   const label = state.isHost ? '（ホスト）' : '';
@@ -3301,6 +3362,13 @@ btnKickYes.addEventListener('click', async (e) => {
 
   if (roomData.hostId && pendingSeatPlayerIdToSteal && roomData.hostId === pendingSeatPlayerIdToSteal) {
     await update(roomRef, { hostId: state.userId });
+  }
+
+  if (pendingSeatPlayerIdToSteal && pendingSeatPlayerIdToSteal !== state.userId) {
+    const transferUpdates = buildSeatTransferUpdates(roomData, pendingSeatPlayerIdToSteal, state.userId);
+    if (Object.keys(transferUpdates).length) {
+      await update(roomRef, transferUpdates);
+    }
   }
 
   state.seatedTable = seatIndex;
